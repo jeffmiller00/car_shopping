@@ -20,7 +20,7 @@ def interested?(model)
 end
 
 def get_model(car_text)
-  car_text.strip.split.find { |hay| MODELS.include?(hay)}
+  car_text.gsub('CX 5','CX-5').split.find { |hay| MODELS.include?(hay)}
 end
 
 def get_year(car_text)
@@ -31,8 +31,20 @@ def get_year(car_text)
   year.to_i + 2000
 end
 
+def get_make_from_model(model)
+  makes = {
+    'edge' => 'Ford',
+    'cx-5' => 'Mazda',
+    'cx5'  => 'Mazda',
+    'cx 5' => 'Mazda'
+  }
+  makes[model.downcase] || 'Unknown'
+end
+
 def get_make(car_text)
-  car_text.strip.split.find { |hay| MAKES.include?(hay)}
+  make = car_text.strip.split.find { |hay| MAKES.include?(hay)}
+  make ||= get_make_from_model(get_model(car_text))
+  make
 end
 
 def get_mpgs(mpg_txt)
