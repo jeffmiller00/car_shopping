@@ -2,7 +2,13 @@ require_relative 'fetch_base'
 
 
 worksheet = get_worksheet
-URLS = ['http://www.hawkford.com','http://www.hawkfordstcharles.com']
+URLS = ['http://www.hawkford.com','http://www.hawkfordstcharles.com',
+        'http://www.bredemannfordauto.com', 'http://www.westfieldford.com',
+        'http://www.packeywebbford.net', 'http://www.bobrohrmanschaumburgford.com',
+        'http://www.fairoaksford.com', 'http://www.tompeckford.com',
+        'http://www.willowbrookford.net', 'http://www.vandrunenford.net',
+        'http://www.foxvlyford.com', 'http://www.wickstromfordlincoln.com',
+        'http://www.ahford.net', 'http://www.napletonfordlibertyville.com']
 
 URLS.each do |url|
   base_url = url
@@ -41,7 +47,10 @@ URLS.each do |url|
       unless worksheet.rows.map{|row| row[11]}.include?(vin)
         year = get_year(headline)
         make = get_make(headline)
-        price = car.xpath(".//span[contains(@class, 'internetPrice')]").first.text.gsub(/\D/, "").to_i
+        if car.xpath(".//span[contains(@class, 'internetPrice')]").first
+          price = car.xpath(".//span[contains(@class, 'internetPrice')]").first.text.gsub(/\D/, "").to_i
+        end
+        price ||= car.xpath(".//span[contains(@class, 'askingPrice')]").first.text.gsub(/\D/, "").to_i
         puts "---------- Price? #{price < MIN_PRICE || price > MAX_PRICE}"
         next if price < MIN_PRICE || price > MAX_PRICE
 
