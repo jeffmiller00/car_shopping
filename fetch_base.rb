@@ -5,12 +5,12 @@ require 'pry'
 require 'google_drive'
 
 
-MAKES = %w(Ford Mazda)
-MODELS = %w(Edge CX5 CX-5)
-MAX_MILES = 50000
-MIN_PRICE = 20000
-MAX_PRICE = 32000
-PER_PAGE = 36
+MAKES = %w(Mazda)
+MODELS = %w(Mazda6)
+MAX_MILES = 40000
+MIN_PRICE = 17000
+MAX_PRICE = 26000
+# PER_PAGE = 36
 
 `brew services start chromedriver`
 
@@ -33,10 +33,7 @@ end
 
 def get_make_from_model(model)
   makes = {
-    'edge' => 'Ford',
-    'cx-5' => 'Mazda',
-    'cx5'  => 'Mazda',
-    'cx 5' => 'Mazda'
+    'Mazda6' => 'Mazda',
   }
   makes[model.downcase] || 'Unknown'
 end
