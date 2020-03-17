@@ -133,7 +133,6 @@ URLS.each do |url|
                         zc: 60175,
                       }
       browser = Watir::Browser.new :chrome, headless: true
-      # browser = Watir::Browser.new :phantomjs
       browser.goto request.url.to_s
       all_cars = browser.execute_script('return CARS.digitalData')
       cars = all_cars['page']['vehicle']
