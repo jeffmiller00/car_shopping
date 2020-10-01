@@ -1,7 +1,7 @@
 require_relative 'fetch_base'
 
 
-# worksheet = get_worksheet
+worksheet = get_worksheet
 PER_PAGE = 100
 # https://www.cars.com/for-sale/searchresults.action/?bsId=20211&dealerType=all&mkId=20001,20049,20005,20017,20073,20028&mlgId=28869&page=1&perPage=100&prMn=15000&prMx=25000&rd=50&searchSource=GN_REFINEMENT&sort=price-highest&stkTypId=28881&yrId=56007,58487,30031936,35797618,36362520,36620293&zc=60175
 URLS = ['https://www.cars.com/for-sale/searchresults.action/']
@@ -10,23 +10,23 @@ URLS.each do |url|
   base_url = url
   request = HTTPI::Request.new
   request.url = base_url
+
   request.query = {
-                    bsId: 20211,
                     dealerType: 'all',
-                    mkId: '20001,20049,20005,20017,20073,20028',
-                    mlgId: 28869,
+                    mdId: '20788,21105,21087,21107,21422,22378,32885',
+                    mkId: '20001,20005,20015,20073',
+                    mlgId: 28870,
                     page:1,
                     perPage: PER_PAGE,
-                    prMn: 15000,
-                    prMx: 25000,
+                    prMn: MIN_PRICE,
+                    prMx: MAX_PRICE,
                     rd: 50,
                     sort: 'price-highest',
                     stkTypId: 28881,
-                    yrId: '56007,58487,30031936,35797618,36362520,36620293',
+                    yrId: '35797618,36362520,36620293',
                     zc: 60175,
                   }
   browser = Watir::Browser.new :chrome, headless: true
-  # browser = Watir::Browser.new :phantomjs
   browser.goto request.url.to_s
   all_cars = browser.execute_script('return CARS.digitalData')
   cars = all_cars['page']['vehicle']
@@ -78,7 +78,7 @@ URLS.each do |url|
   PAGES.times do |n|
     cars.each do |car|
       vin  = car['vin']
-      # next if worksheet.rows.map{|row| row[11]}.include?(vin)
+      next if worksheet.rows.map{|row| row[11]}.include?(vin)
 
       year = car['year']
       make = car['make']
@@ -102,13 +102,14 @@ URLS.each do |url|
       # if car.search("[text()*='Ext. Color']").first.parent.text.gsub('Ext. Color:','').strip
       #   color = car.search("[text()*='Ext. Color']").first.parent.text.gsub('Ext. Color:','').strip
       # end
+      city_mpg, hwy_mpg, color = ['', '', '']
 
       link = "https://www.cars.com/vehicledetail/detail/#{car['listingId']}/overview/"
       certified = car['certified'] ? 'Yes' : 'No'
       more_info = car['trim']
 
-      # worksheet.insert_rows(worksheet.num_rows + 1, [[year, make, model, certified, price, mileage, city_mpg, hwy_mpg, color, headline, link, vin, Date.today.to_s, more_info]])
-      # worksheet.save
+      worksheet.insert_rows(worksheet.num_rows + 1, [[year, make, model, certified, price, mileage, city_mpg, hwy_mpg, color, headline, link, vin, Date.today.to_s, more_info]])
+      worksheet.save
     end
 
 # binding.pry
@@ -118,18 +119,18 @@ URLS.each do |url|
       puts '|---------------------------------------------------'
       request.url = base_url
       request.query = {
-                        bsId: 20211,
                         dealerType: 'all',
-                        mkId: '20001,20049,20005,20017,20073,20028',
-                        mlgId: 28869,
-                        page: n+2,
+                        mdId: '20788,21105,21087,21107,21422',
+                        mkId: '20001,20015,20073',
+                        mlgId: 28870,
+                        page:1,
                         perPage: PER_PAGE,
-                        prMn: 15000,
-                        prMx: 25000,
+                        prMn: 20000,
+                        prMx: 60000,
                         rd: 50,
                         sort: 'price-highest',
                         stkTypId: 28881,
-                        yrId: '56007,58487,30031936,35797618,36362520,36620293',
+                        yrId: '35797618,36362520,36620293',
                         zc: 60175,
                       }
       browser = Watir::Browser.new :chrome, headless: true
@@ -140,4 +141,4 @@ URLS.each do |url|
   end
 end
 
-`brew services stop chromedriver`
+# brew services stop chromedriver

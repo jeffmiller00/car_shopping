@@ -5,14 +5,14 @@ require 'pry'
 require 'google_drive'
 
 
-MAKES = %w(Mazda)
-MODELS = %w(Mazda6)
-MAX_MILES = 40000
-MIN_PRICE = 17000
-MAX_PRICE = 26000
+MAKES = %w(Acura Ford Mazda BMW)
+MODELS = %w(MDX Explorer CX-9 X5)
+MAX_MILES = 25000
+MIN_PRICE = 25000
+MAX_PRICE = 60000
 # PER_PAGE = 36
 
-`brew services start chromedriver`
+# brew services start chromedriver
 
 
 def interested?(model)
@@ -20,7 +20,7 @@ def interested?(model)
 end
 
 def get_model(car_text)
-  car_text.gsub('CX 5','CX-5').split.find { |hay| MODELS.include?(hay)}
+  car_text.gsub('CX 9','CX-9').split.find { |hay| MODELS.include?(hay)}
 end
 
 def get_year(car_text)
@@ -33,7 +33,10 @@ end
 
 def get_make_from_model(model)
   makes = {
-    'Mazda6' => 'Mazda',
+    'MDX' => 'Acura',
+    'Explorer' => 'Ford',
+    'CX-9' => 'Mazda',
+    'X5' => 'BMW',
   }
   makes[model.downcase] || 'Unknown'
 end
