@@ -1,144 +1,141 @@
 require_relative 'fetch_base'
 
 
-worksheet = get_worksheet
 PER_PAGE = 100
-# https://www.cars.com/for-sale/searchresults.action/?bsId=20211&dealerType=all&mkId=20001,20049,20005,20017,20073,20028&mlgId=28869&page=1&perPage=100&prMn=15000&prMx=25000&rd=50&searchSource=GN_REFINEMENT&sort=price-highest&stkTypId=28881&yrId=56007,58487,30031936,35797618,36362520,36620293&zc=60175
-URLS = ['https://www.cars.com/for-sale/searchresults.action/']
+BASE_URL = 'https://www.cars.com/shopping/results/'.freeze
 
-URLS.each do |url|
-  base_url = url
+def build_request_url(page=1)
   request = HTTPI::Request.new
-  request.url = base_url
+  request.url = BASE_URL
 
-  request.query = {
-                    dealerType: 'all',
-                    mdId: '20788,21105,21087,21107,21422,22378,32885',
-                    mkId: '20001,20005,20015,20073',
-                    mlgId: 28870,
-                    page:1,
-                    perPage: PER_PAGE,
-                    prMn: MIN_PRICE,
-                    prMx: MAX_PRICE,
-                    rd: 50,
-                    sort: 'price-highest',
-                    stkTypId: 28881,
-                    yrId: '35797618,36362520,36620293',
-                    zc: 60175,
+    request.query = {
+                    list_price_max: MAX_PRICE,
+                    list_price_min: MIN_PRICE,
+                    maximum_distance: 75,
+                    page: page,
+                    page_size: PER_PAGE,
+                    sort: 'list_price_desc',
+                    stock_type: 'all',
+                    year_max: Date.today.year+1,
+                    year_min: 2021,
+                    zip: 60175
                   }
-  browser = Watir::Browser.new :chrome, headless: true
-  browser.goto request.url.to_s
-  all_cars = browser.execute_script('return CARS.digitalData')
-  cars = all_cars['page']['vehicle']
+  MAKES.each do |make|
+    request.query << "&makes[]=#{make}"
+  end
+  MODELS.each do |model|
+    request.query << "&models[]=#{model}"
+  end
 
-  full_doc = Nokogiri::HTML.parse(browser.html)
-  count = full_doc.xpath(".//span[contains(@class, 'filter-count')]").text.gsub(/\D/, "").to_i
+  request.url.to_s
+end
 
-  PAGES = (count * 1.0 / PER_PAGE).ceil
 
 
 =begin
-  {"bodyStyle"=>"Sedan",
-   "certified"=>false,
-   "customerId"=>5381876,
-   "detail"=>"searchResults",
-   "listingId"=>775767104,
-   "make"=>"Acura",
-   "makeId"=>20001,
-   "mileage"=>5997,
-   "model"=>"ILX",
-   "modelId"=>47843,
-   "price"=>25000,
-   "priceBadge"=>"Good Deal",
-   "privateSeller"=>false,
-   "seller"=>
-    {"city"=>"Libertyville",
-     "customerId"=>5381876,
-     "dealerChatProvider"=>nil,
-     "distanceFromSearchZip"=>30,
-     "formattedPhoneNumber"=>"(888) 820-2207",
-     "formattedPhoneNumber2"=>nil,
-     "hasCpoShowroomEnabled"=>true,
-     "id"=>45331765,
-     "name"=>"McGrath Acura of Libertyville",
-     "phoneNumber"=>"8888202207",
-     "phoneNumber2"=>nil,
-     "rating"=>4.8,
-     "reviewCount"=>"21",
-     "sellerDisplayLabel"=>"Dealer",
-     "state"=>"IL",
-     "streetAddress"=>"1620 S Milwaukee Ave",
-     "truncatedDescription"=>"2018 Acura ILX Technology Package Bellanova White Pearl FWD 2.4L I4 DO..."},
-   "stockType"=>"Used",
-   "trim"=>"Technology Plus Package",
-   "type"=>"inventory",
-   "vin"=>"19UDE2F7XJA007568",
-   "year"=>2018}
+dealer_id=
+keyword=
+list_price_max=
+list_price_min=
+makes[]=kia
+maximum_distance=75
+mileage_max=
+models[]=kia-telluride
+monthly_payment=
+page=1
+page_size=100
+sort=best_match_desc
+stock_type=all
+year_max=
+year_min=
+zip=60175
 =end
-  PAGES.times do |n|
-    cars.each do |car|
-      vin  = car['vin']
-      next if worksheet.rows.map{|row| row[11]}.include?(vin)
 
-      year = car['year']
-      make = car['make']
-      model = car['model']
-      puts "---------- Interested? #{interested?(model)}"
-      next unless interested?(model)
+browser = Watir::Browser.new :chrome, headless: true
+browser.goto build_request_url
 
-      headline = car['seller']['truncatedDescription'].gsub('...','') || "#{year} #{make} #{model} - #{car['trim']}"
-      puts "---------- Evaluating: #{headline}"
+all_cars = JSON.parse(browser.elements(tag_name: 'cars-datalayer').first.text_content).first['vehicle_array']
+total_results = browser.spans(class: 'total-filter-count').first.text_content.gsub(/\D/,'').to_i
+pages = (total_results.to_f / PER_PAGE).ceil
 
-      price = car['price'].to_i
-      puts "---------- Price? #{price < MIN_PRICE || price > MAX_PRICE}"
-      next if price < MIN_PRICE || price > MAX_PRICE
+=begin
+{"trim"=>"S",
+ "make"=>"Kia",
+ "cat"=>"suv_midsize",
+ "year"=>"2021",
+ "customer_id"=>"6062832",
+ "stock_type"=>"Used",
+ "vin"=>"5XYP6DHC5MG134294",
+ "seller_type"=>"dealership",
+ "certified_preowned"=>false,
+ "listing_id"=>"5c3f0822-d6f2-4952-b8e2-be302a1082a6",
+ "mileage"=>"35997",
+ "model"=>"Telluride",
+ "sponsored"=>true,
+ "nvi_program"=>false,
+ "exterior_color"=>"Ebony Black",
+ "fuel_type"=>"Gasoline",
+ "msrp"=>"37500",
+ "sponsored_type"=>"inventory_ad",
+ "bodystyle"=>"SUV",
+ "price"=>"33750",
+ "cpo_indicator"=>false,
+ "badges"=>["great_deal", "price_drop_in_cents"],
+ "canonical_mmt"=>"Kia:Telluride:S",
+ "stock_sub"=>""}
+=end
+ws = get_worksheet
+pages.times do |n|
+  all_cars.each do |car|
+    vin  = car['vin']
+    next if ws.rows.map{|row| row[11]}.include?(vin)
 
-      mileage = car['mileage'].to_i
-      puts "---------- Miles? #{mileage > MAX_MILES}"
-      next if mileage > MAX_MILES
+    year = car['year']
+    make = car['make']
+    model = car['model']
 
-      # car.search("[text()*='EPA-Est MPG']")
-      # city_mpg, hwy_mpg = get_mpgs(car.search("[text()*='EPA-Est MPG']").first.next_element.text)
-      # if car.search("[text()*='Ext. Color']").first.parent.text.gsub('Ext. Color:','').strip
-      #   color = car.search("[text()*='Ext. Color']").first.parent.text.gsub('Ext. Color:','').strip
-      # end
-      city_mpg, hwy_mpg, color = ['', '', '']
+    # This isn't needed right now.
+    # puts "---------- Interested? #{interested?(model)}"
+    # next unless interested?(model)
 
-      link = "https://www.cars.com/vehicledetail/detail/#{car['listingId']}/overview/"
-      certified = car['certified'] ? 'Yes' : 'No'
-      more_info = car['trim']
+    headline = "#{year} #{make} #{model} - #{car['trim']}"
+    puts "---------- Evaluating: #{headline}"
 
-      worksheet.insert_rows(worksheet.num_rows + 1, [[year, make, model, certified, price, mileage, city_mpg, hwy_mpg, color, headline, link, vin, Date.today.to_s, more_info]])
-      worksheet.save
-    end
+    price = car['price'].to_i
+    puts "---------- Price? #{price.between?(MIN_PRICE, MAX_PRICE)}"
+    next unless price.between?(MIN_PRICE, MAX_PRICE)
 
-# binding.pry
-    if n + 1 < PAGES
-      puts '|---------------------------------------------------'
-      puts 'THERE ARE MORE!'
-      puts '|---------------------------------------------------'
-      request.url = base_url
-      request.query = {
-                        dealerType: 'all',
-                        mdId: '20788,21105,21087,21107,21422',
-                        mkId: '20001,20015,20073',
-                        mlgId: 28870,
-                        page:1,
-                        perPage: PER_PAGE,
-                        prMn: 20000,
-                        prMx: 60000,
-                        rd: 50,
-                        sort: 'price-highest',
-                        stkTypId: 28881,
-                        yrId: '35797618,36362520,36620293',
-                        zc: 60175,
-                      }
-      browser = Watir::Browser.new :chrome, headless: true
-      browser.goto request.url.to_s
-      all_cars = browser.execute_script('return CARS.digitalData')
-      cars = all_cars['page']['vehicle']
-    end
+    mileage = car['mileage'].to_i
+    puts "---------- Miles? #{mileage > MAX_MILES}"
+    next if mileage > MAX_MILES
+
+    certified = car['certified_preowned'] ? 'Yes' : 'No'
+
+    link = "https://www.cars.com/vehicledetail/#{car['listing_id']}/"
+    more_info = car['badges'].any? ? "Specials: #{car['badges'].join(', ')}" : ''
+
+    ws.insert_rows(ws.num_rows + 1, [[year,
+                                      make,
+                                      model,
+                                      certified,
+                                      price,
+                                      mileage,
+                                      car['trim'],
+                                      car['msrp'],
+                                      car['exterior_color'],
+                                      headline,
+                                      link,
+                                      vin,
+                                      Date.today.to_s,
+                                      more_info]])
+  end
+  ws.save
+
+  if n + 1 < pages
+    puts '|---------------------------------------------------'
+    puts "THERE ARE MORE! ~ Page #{n+1} of #{pages} complete. Moving to page #{n+2}"
+    puts '|---------------------------------------------------'
+    browser.goto build_request_url(n+2)
+    all_cars = JSON.parse(browser.elements(tag_name: 'cars-datalayer').first.text_content).first['vehicle_array']
   end
 end
-
-# brew services stop chromedriver

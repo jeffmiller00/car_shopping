@@ -5,14 +5,12 @@ require 'pry'
 require 'google_drive'
 
 
-MAKES = %w(Acura Ford Mazda BMW)
-MODELS = %w(MDX Explorer CX-9 X5)
+MAKES = %w(kia honda hyundai toyota volkswagen)
+MODELS = %w(kia-carnival kia-telluride honda-odyssey honda-pilot hyundai-palisade toyota-highlander toyota-highlander_hybrid toyota-sienna volkswagen-atlas)
 MAX_MILES = 25000
-MIN_PRICE = 25000
-MAX_PRICE = 60000
+MIN_PRICE = 30000
+MAX_PRICE = 55000
 # PER_PAGE = 36
-
-# brew services start chromedriver
 
 
 def interested?(model)
