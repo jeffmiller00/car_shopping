@@ -1,13 +1,16 @@
+require 'dotenv/load'
 require 'httpi'
-require 'nokogiri'
-require 'watir'
+# require 'nokogiri'
+# require 'watir'
+require 'typhoeus'
 require 'pry'
 require 'google_drive'
 
 
-MAKES = %w(kia honda hyundai toyota volkswagen)
-MODELS = %w(kia-carnival kia-telluride honda-odyssey honda-pilot hyundai-palisade toyota-highlander toyota-highlander_hybrid toyota-sienna volkswagen-atlas)
+MAKES = %w(ford)
+MODELS = %w(ford-f_150 ford-pickup_truck)
 MAX_MILES = 25000
+MIN_YEAR  = 2005
 MIN_PRICE = 30000
 MAX_PRICE = 55000
 # PER_PAGE = 36

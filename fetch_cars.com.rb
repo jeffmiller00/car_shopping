@@ -4,35 +4,8 @@ require_relative 'fetch_base'
 PER_PAGE = 100
 BASE_URL = 'https://www.cars.com/shopping/results/'.freeze
 
-def build_request_url(page=1)
-  request = HTTPI::Request.new
-  request.url = BASE_URL
-
-    request.query = {
-                    list_price_max: MAX_PRICE,
-                    list_price_min: MIN_PRICE,
-                    maximum_distance: 75,
-                    page: page,
-                    page_size: PER_PAGE,
-                    sort: 'list_price_desc',
-                    stock_type: 'all',
-                    year_max: Date.today.year+1,
-                    year_min: 2021,
-                    zip: 60175
-                  }
-  MAKES.each do |make|
-    request.query << "&makes[]=#{make}"
-  end
-  MODELS.each do |model|
-    request.query << "&models[]=#{model}"
-  end
-
-  request.url.to_s
-end
-
-
-
 =begin
+include_shippable=
 dealer_id=
 keyword=
 list_price_max=
@@ -50,41 +23,90 @@ year_max=
 year_min=
 zip=60175
 =end
+def build_request_url(page=1)
+  request = HTTPI::Request.new
+  request.url = BASE_URL
 
-browser = Watir::Browser.new :chrome, headless: true
-browser.goto build_request_url
+  request.query = {
+    list_price_max: MAX_PRICE,
+    list_price_min: MIN_PRICE,
+    maximum_distance: 75,
+    page: page,
+    page_size: PER_PAGE,
+    sort: 'list_price_desc',
+    stock_type: 'all',
+    year_max: Date.today.year+1,
+    year_min: MIN_YEAR,
+    zip: 60175,
+    include_shippable: true,
+  }
+  MAKES.each do |make|
+    request.query << "&makes[]=#{make}"
+  end
+  MODELS.each do |model|
+    request.query << "&models[]=#{model}"
+  end
 
-all_cars = JSON.parse(browser.elements(tag_name: 'cars-datalayer').first.text_content).first['vehicle_array']
-total_results = browser.spans(class: 'total-filter-count').first.text_content.gsub(/\D/,'').to_i
+  request.url.to_s
+end
+
+
+
+response = Typhoeus.post(
+  "https://api.zyte.com/v1/extract",
+  userpwd: ENV['ZYTE_API_KEY'],
+  headers: { "Content-Type" => "application/json" },
+  body: {
+    url: build_request_url,
+    httpResponseBody: true,
+    followRedirect: true
+  }.to_json
+)
+
+raw_html = Base64.decode64(JSON.parse(response.body)['httpResponseBody']) 
+doc = Nokogiri::HTML(raw_html)
+
+all_cars = JSON.parse(doc.at_css("cars-datalayer").text.strip).first['vehicle_array']
+total_results = doc.at_css("span.total-filter-count").text.gsub(/\D/,'').to_i
 pages = (total_results.to_f / PER_PAGE).ceil
 
 =begin
-{"trim"=>"S",
- "make"=>"Kia",
- "cat"=>"suv_midsize",
- "year"=>"2021",
- "customer_id"=>"6062832",
- "stock_type"=>"Used",
- "vin"=>"5XYP6DHC5MG134294",
- "seller_type"=>"dealership",
- "certified_preowned"=>false,
- "listing_id"=>"5c3f0822-d6f2-4952-b8e2-be302a1082a6",
- "mileage"=>"35997",
- "model"=>"Telluride",
- "sponsored"=>true,
- "nvi_program"=>false,
- "exterior_color"=>"Ebony Black",
- "fuel_type"=>"Gasoline",
- "msrp"=>"37500",
- "sponsored_type"=>"inventory_ad",
- "bodystyle"=>"SUV",
- "price"=>"33750",
- "cpo_indicator"=>false,
- "badges"=>["great_deal", "price_drop_in_cents"],
- "canonical_mmt"=>"Kia:Telluride:S",
- "stock_sub"=>""}
+"listing_id" => "fe5f5873-12bc-42ea-a522-9fb3f1077617",
+"vertical_position" => 1,
+"cpo_indicator" => false,
+"stock_sub" => "",
+"canonical_mmty" => "Ford:F-150:STX:2025",
+"model" => "F-150",
+"price" => "49840",
+"trim" => "STX",
+"dealer_name" => "Harvard Ford",
+"customer_id" => "6000759",
+"nvi_program" => false,
+"vin" => "1FTEW2LP8SFA38844",
+"cat" => "truck_fullsize",
+"badges" => ["american_made_index_ranking"],
+"mileage" => "22",
+"seller_type" => "dealership",
+"stock_type" => "New",
+"year" => "2025",
+"msrp" => "55095",
+"fuel_type" => "Gasoline",
+"certified_preowned" => false,
+"canonical_mmt" => "Ford:F-150:STX",
+"drivetrain" => "Four-wheel Drive",
+"interior_color" => "Black/Bronze",
+"sponsored_type" => "inventory_ad",
+"relevancy_score" => nil,
+"sponsored" => true,
+"dealer_zip" => "60033",
+"bodystyle" => "Truck",
+"make" => "Ford",
+"exterior_color" => "Iconic Silver Metallic",
+"photo_count" => 25,
+"cpo_package" => nil},
 =end
 ws = get_worksheet
+binding.pry
 pages.times do |n|
   all_cars.each do |car|
     vin  = car['vin']
