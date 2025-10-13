@@ -63,7 +63,8 @@ response = Typhoeus.post(
   }.to_json
 )
 
-raw_html = Base64.decode64(JSON.parse(response.body)['httpResponseBody']) 
+binding.pry if response.code != 200 || response.body.nil? || response.body.strip.empty?
+raw_html = Base64.decode64(JSON.parse(response.body)['httpResponseBody'])
 doc = Nokogiri::HTML(raw_html)
 
 all_cars = JSON.parse(doc.at_css("cars-datalayer").text.strip).first['vehicle_array']
@@ -105,8 +106,8 @@ pages = (total_results.to_f / PER_PAGE).ceil
 "photo_count" => 25,
 "cpo_package" => nil},
 =end
+
 ws = get_worksheet
-binding.pry
 pages.times do |n|
   all_cars.each do |car|
     vin  = car['vin']
@@ -157,7 +158,21 @@ pages.times do |n|
     puts '|---------------------------------------------------'
     puts "THERE ARE MORE! ~ Page #{n+1} of #{pages} complete. Moving to page #{n+2}"
     puts '|---------------------------------------------------'
-    browser.goto build_request_url(n+2)
-    all_cars = JSON.parse(browser.elements(tag_name: 'cars-datalayer').first.text_content).first['vehicle_array']
+    response = Typhoeus.post(
+      "https://api.zyte.com/v1/extract",
+      userpwd: ENV['ZYTE_API_KEY'],
+      headers: { "Content-Type" => "application/json" },
+      body: {
+        url: build_request_url(n+2),
+        httpResponseBody: true,
+        followRedirect: true
+      }.to_json
+    )
+
+    binding.pry if response.code != 200 || response.body.nil? || response.body.strip.empty?
+    raw_html = Base64.decode64(JSON.parse(response.body)['httpResponseBody'])
+    doc = Nokogiri::HTML(raw_html)
+
+    all_cars = JSON.parse(doc.at_css("cars-datalayer").text.strip).first['vehicle_array']
   end
 end
