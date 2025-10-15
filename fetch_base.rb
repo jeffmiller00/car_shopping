@@ -7,12 +7,13 @@ require 'pry'
 require 'google_drive'
 
 
-MAKES = %w(ford)
-MODELS = %w(ford-f_150 ford-pickup_truck)
+MAKES = %w(ford gmc ram)
+MODELS = %w(ford-f_150 ford-pickup_truck gmc-1500 gmc-sierra_1500 gmc-sierra_2500 ram-1500 ram-2500)
+
 MAX_MILES = 25000
 MIN_YEAR  = 2005
 MIN_PRICE = 30000
-MAX_PRICE = 55000
+MAX_PRICE = 45000
 # PER_PAGE = 36
 
 
