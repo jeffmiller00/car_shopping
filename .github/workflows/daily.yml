@@ -1,0 +1,40 @@
+name: Daily car fetch
+
+on:
+  schedule:
+    - cron: '0 12 * * *' # 12:00 UTC daily
+  workflow_dispatch:
+
+jobs:
+  fetch-cars:
+    runs-on: ubuntu-latest
+    env:
+      ZYTE_API_KEY: ${{ secrets.ZYTE_API_KEY }}
+      GOOGLE_SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.4'
+          bundler-cache: true
+
+      - name: Install package dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential libxml2-dev libxslt1-dev
+
+      - name: Configure Google credentials
+        run: |
+          printf "%s" "$GOOGLE_SERVICE_ACCOUNT_JSON" > client_secret.json
+          chmod 600 client_secret.json
+        shell: bash
+
+      - name: Run Cars.com fetch
+        run: bundle exec ruby fetch_cars.com.rb
+
+      - name: Cleanup credentials
+        if: always()
+        run: rm -f client_secret.json
