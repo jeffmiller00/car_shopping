@@ -12,8 +12,8 @@ MODELS = %w(ford-f_150 ford-pickup_truck gmc-1500 gmc-sierra_1500 gmc-sierra_250
 
 MAX_MILES = 25000
 MIN_YEAR  = 2005
-MIN_PRICE = 30000
-MAX_PRICE = 45000
+MIN_PRICE = 25000
+MAX_PRICE = 40000
 # PER_PAGE = 36
 
 
