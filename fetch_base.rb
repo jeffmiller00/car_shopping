@@ -11,7 +11,7 @@ MAKES = %w(ford gmc ram)
 MODELS = %w(ford-f_150 ford-pickup_truck gmc-1500 gmc-sierra_1500 gmc-sierra_2500 ram-1500 ram-2500)
 
 MAX_MILES = 25000
-MIN_YEAR  = 2005
+MIN_YEAR  = 2022
 MIN_PRICE = 25000
 MAX_PRICE = 40000
 # PER_PAGE = 36
