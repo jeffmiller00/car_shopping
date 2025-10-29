@@ -147,6 +147,8 @@ pages.times do |n|
                                       mileage,
                                       car['trim'],
                                       car['back_cam'],
+                                      car['back_cam'],
+                                      car['back_cam'],
                                       car['msrp'],
                                       car['exterior_color'],
                                       headline,
