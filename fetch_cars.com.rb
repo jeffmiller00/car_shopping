@@ -137,6 +137,8 @@ pages.times do |n|
     link = "https://www.cars.com/vehicledetail/#{car['listing_id']}/"
     more_info = car['badges'].any? ? "Specials: #{car['badges'].join(', ')}" : ''
 
+    car['back_cam'] = 'Unknown'
+
     ws.insert_rows(ws.num_rows + 1, [[year,
                                       make,
                                       model,
@@ -144,6 +146,7 @@ pages.times do |n|
                                       price,
                                       mileage,
                                       car['trim'],
+                                      car['back_cam'],
                                       car['msrp'],
                                       car['exterior_color'],
                                       headline,

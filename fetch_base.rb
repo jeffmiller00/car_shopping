@@ -1,7 +1,7 @@
 require 'dotenv/load'
 require 'httpi'
 # require 'nokogiri'
-# require 'watir'
+require 'watir'
 require 'typhoeus'
 require 'pry'
 require 'google_drive'
