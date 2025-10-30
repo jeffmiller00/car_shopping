@@ -3,8 +3,10 @@
 source "https://rubygems.org"
 
 gem "dotenv"
-gem "httpi"
-gem "typhoeus"
-gem "pry"
 gem "google_drive"
+gem "httpi"
+gem "logger"
 gem "nokogiri"
+gem "pry"
+gem "typhoeus"
+gem "watir"

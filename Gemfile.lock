@@ -73,6 +73,7 @@ GEM
       rack (>= 2.0, < 4)
     jwt (2.10.2)
       base64
+    logger (1.7.0)
     memoist (0.16.2)
     method_source (1.1.0)
     mini_mime (1.1.5)
@@ -103,6 +104,7 @@ GEM
     public_suffix (6.0.2)
     racc (1.8.1)
     rack (3.2.3)
+    regexp_parser (2.11.3)
     representable (3.2.0)
       declarative (< 0.1.0)
       trailblazer-option (>= 0.1.1, < 0.2.0)
@@ -110,6 +112,13 @@ GEM
     retriable (3.1.2)
     rexml (3.4.4)
     ruby2_keywords (0.0.5)
+    rubyzip (3.2.1)
+    selenium-webdriver (4.38.0)
+      base64 (~> 0.2)
+      logger (~> 1.4)
+      rexml (~> 3.2, >= 3.2.5)
+      rubyzip (>= 1.2.2, < 4.0)
+      websocket (~> 1.0)
     signet (0.21.0)
       addressable (~> 2.8)
       faraday (>= 0.17.5, < 3.a)
@@ -119,6 +128,10 @@ GEM
     typhoeus (1.5.0)
       ethon (>= 0.9.0, < 0.16.0)
     uber (0.1.0)
+    watir (7.3.0)
+      regexp_parser (>= 1.2, < 3)
+      selenium-webdriver (~> 4.2)
+    websocket (1.2.11)
 
 PLATFORMS
   aarch64-linux-gnu
@@ -134,9 +147,11 @@ DEPENDENCIES
   dotenv
   google_drive
   httpi
+  logger
   nokogiri
   pry
   typhoeus
+  watir
 
 BUNDLED WITH
    2.7.2
