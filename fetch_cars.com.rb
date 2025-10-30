@@ -111,7 +111,7 @@ ws = get_worksheet
 pages.times do |n|
   all_cars.each do |car|
     vin  = car['vin']
-    next if ws.rows.map{|row| row[11]}.include?(vin)
+    next if ws.rows.map{|row| row[COL_VIN]}.include?(vin)
 
     year = car['year']
     make = car['make']

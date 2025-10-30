@@ -16,6 +16,8 @@ MIN_PRICE = 25000
 MAX_PRICE = 40000
 # PER_PAGE = 36
 
+COL_VIN = 14
+
 
 def interested?(model)
   !model.nil?
