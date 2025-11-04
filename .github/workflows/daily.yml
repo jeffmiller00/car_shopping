@@ -2,11 +2,12 @@ name: Daily car fetch
 
 on:
   schedule:
-    - cron: '0 12 * * *' # 12:00 UTC daily
+    - cron: "0 12 * * *" # 12:00 UTC daily
   workflow_dispatch:
 
 jobs:
   fetch-cars:
+    if: ${{ false }} # Temporarily disabled; keep for future reference
     runs-on: ubuntu-latest
     env:
       ZYTE_API_KEY: ${{ secrets.ZYTE_API_KEY }}
@@ -18,7 +19,7 @@ jobs:
       - name: Set up Ruby
         uses: ruby/setup-ruby@v1
         with:
-          ruby-version: '3.4'
+          ruby-version: "3.4"
           bundler-cache: true
 
       - name: Install package dependencies
